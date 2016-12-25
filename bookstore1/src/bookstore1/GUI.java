@@ -1,0 +1,601 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package bookstore1;
+
+import java.awt.HeadlessException;
+import java.awt.Image;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.swing.ImageIcon;
+import javax.swing.JFileChooser;
+import javax.swing.JOptionPane;
+import javax.swing.filechooser.FileNameExtensionFilter;
+import javax.swing.table.DefaultTableModel;
+
+/**
+ *
+ * @author dhabi
+ */
+public final class GUI extends javax.swing.JFrame {
+
+    /**
+     * Creates new form GUI
+     */
+    public GUI() {
+        initComponents();
+         Show_Books_In_JTable();
+    }
+    String ImgPath = null;
+ public Connection getConnection() {
+        try {        Connection con = null;
+
+            Class.forName("com.mysql.jdbc.Driver");
+            con = DriverManager.getConnection("jdbc:mysql://localhost:3306/bookstore", "root", "root");
+            return con;
+        } catch (ClassNotFoundException | SQLException ex) {
+            Logger.getLogger(GUI.class.getName()).log(Level.SEVERE, null, ex);
+            return null;
+        }
+
+    }
+    
+  //Check input fields
+    public boolean checkInputs() {
+        if (txt_name.getText() == null
+                || txt_price.getText() == null
+                || txt_author.getText() == null
+                || txt_ISBN.getText() == null) {
+            return false;
+        } else {
+            try {
+                Float.parseFloat(txt_price.getText());
+                return true;
+            } catch (NumberFormatException ex) {
+                return false;
+            }
+        }
+
+    }
+ 
+ 
+    // Resize Image
+    public ImageIcon ResizeImage(String imagePath, byte[] pic) {
+        ImageIcon myImage = null;
+
+        if (imagePath != null) {
+            myImage = new ImageIcon(imagePath);
+        } else {
+            myImage = new ImageIcon(pic);
+        }
+        Image img = myImage.getImage();
+        Image img2 = img.getScaledInstance(lbl_image.getWidth(), lbl_image.getHeight(), Image.SCALE_SMOOTH);
+        ImageIcon image = new ImageIcon(img2);
+        return image;
+    }
+    
+    
+    
+      // Display Data In JTable: 
+    //      1 - Fill ArrayList With The Data
+    
+    public ArrayList<Book> getBookList()
+    {
+            ArrayList<Book> bookList  = new ArrayList<>();
+            Connection con;
+        con = getConnection();
+            String query = "SELECT * FROM book";
+            
+            Statement st;
+            ResultSet rs;
+            
+        try {
+            
+            st = con.createStatement();
+            rs = st.executeQuery(query);
+            Book book;
+            
+            while(rs.next())
+            {
+                book = new Book(rs.getInt("id"),rs.getString("author"),rs.getString("ISBN"),rs.getString("name"),Float.parseFloat(rs.getString("price")),rs.getBytes("image"));
+                bookList.add(book);
+            }
+            
+        } catch (SQLException ex) {
+                JOptionPane.showMessageDialog(null, ex.getMessage());
+        }
+        
+        return bookList; 
+                
+    }
+    
+    
+      //      2 - Populate The JTable
+    
+    public void Show_Books_In_JTable()
+    {
+        ArrayList<Book> list = getBookList();
+        DefaultTableModel model = (DefaultTableModel)JTable_Books.getModel();
+        // clear jtable content
+        model.setRowCount(0);
+        Object[] row = new Object[5];
+        for(int i = 0; i < list.size(); i++)
+        {
+            row[0] = list.get(i).getId();
+            row[1] = list.get(i).getName();
+            row[2] = list.get(i).getAuthor();
+            row[3] = list.get(i).getISBN();
+            row[4] = list.get(i).getPrice();
+
+            model.addRow(row);
+        }
+    }
+    
+    // Show Data In Inputs
+    public void ShowItem(int index)
+    {
+        txt_id.setText(Integer.toString(getBookList().get(index).getId()));
+        txt_name.setText(getBookList().get(index).getName());
+        txt_author.setText(getBookList().get(index).getAuthor());
+        txt_ISBN.setText(getBookList().get(index).getISBN());
+        txt_price.setText(Float.toString((float) getBookList().get(index).getPrice()));                 
+        lbl_image.setIcon(ResizeImage(null, getBookList().get(index).getImage()));
+    }
+  
+    /**
+     * This method is called from within the constructor to initialize the form.
+     * WARNING: Do NOT modify this code. The content of this method is always
+     * regenerated by the Form Editor.
+     */
+    @SuppressWarnings("unchecked")
+    // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
+    private void initComponents() {
+
+        jPanel1 = new javax.swing.JPanel();
+        jLabel1 = new javax.swing.JLabel();
+        jLabel3 = new javax.swing.JLabel();
+        jLabel4 = new javax.swing.JLabel();
+        jLabel5 = new javax.swing.JLabel();
+        jLabel6 = new javax.swing.JLabel();
+        jLabel7 = new javax.swing.JLabel();
+        txt_id = new javax.swing.JTextField();
+        txt_author = new javax.swing.JTextField();
+        txt_name = new javax.swing.JTextField();
+        txt_ISBN = new javax.swing.JTextField();
+        txt_price = new javax.swing.JTextField();
+        lbl_image = new javax.swing.JLabel();
+        jScrollPane1 = new javax.swing.JScrollPane();
+        JTable_Books = new javax.swing.JTable();
+        btn_update = new javax.swing.JButton();
+        btn_add = new javax.swing.JButton();
+        btn_delete = new javax.swing.JButton();
+        Btn_Choose_Image = new javax.swing.JButton();
+
+        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+
+        jPanel1.setBackground(new java.awt.Color(0, 102, 102));
+
+        jLabel1.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        jLabel1.setText("Image:");
+
+        jLabel3.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        jLabel3.setText("ID:");
+        jLabel3.setToolTipText("");
+
+        jLabel4.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        jLabel4.setText("Name:");
+        jLabel4.setToolTipText("");
+
+        jLabel5.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        jLabel5.setText("Author:");
+        jLabel5.setToolTipText("");
+
+        jLabel6.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        jLabel6.setText("ISBN:");
+        jLabel6.setToolTipText("");
+
+        jLabel7.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        jLabel7.setText("Price:");
+        jLabel7.setToolTipText("");
+
+        txt_id.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                txt_idActionPerformed(evt);
+            }
+        });
+
+        txt_author.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                txt_authorActionPerformed(evt);
+            }
+        });
+
+        txt_name.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                txt_nameActionPerformed(evt);
+            }
+        });
+
+        txt_ISBN.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                txt_ISBNActionPerformed(evt);
+            }
+        });
+
+        txt_price.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                txt_priceActionPerformed(evt);
+            }
+        });
+
+        lbl_image.setBackground(new java.awt.Color(0, 204, 102));
+        lbl_image.setOpaque(true);
+
+        JTable_Books.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+
+            },
+            new String [] {
+                "ID", "Name", "Author", "ISBN", "Price"
+            }
+        ));
+        JTable_Books.addAncestorListener(new javax.swing.event.AncestorListener() {
+            public void ancestorMoved(javax.swing.event.AncestorEvent evt) {
+            }
+            public void ancestorAdded(javax.swing.event.AncestorEvent evt) {
+                JTable_BooksAncestorAdded(evt);
+            }
+            public void ancestorRemoved(javax.swing.event.AncestorEvent evt) {
+            }
+        });
+        jScrollPane1.setViewportView(JTable_Books);
+
+        btn_update.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        btn_update.setIcon(new javax.swing.ImageIcon(getClass().getResource("/bookstore1/accept-database (2).png"))); // NOI18N
+        btn_update.setText("Update");
+        btn_update.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btn_updateActionPerformed(evt);
+            }
+        });
+
+        btn_add.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        btn_add.setIcon(new javax.swing.ImageIcon(getClass().getResource("/bookstore1/add-to-database (2).png"))); // NOI18N
+        btn_add.setText("Add");
+        btn_add.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btn_addActionPerformed(evt);
+            }
+        });
+
+        btn_delete.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        btn_delete.setIcon(new javax.swing.ImageIcon(getClass().getResource("/bookstore1/remove-from-database (2).png"))); // NOI18N
+        btn_delete.setText("Delete");
+        btn_delete.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btn_deleteActionPerformed(evt);
+            }
+        });
+
+        Btn_Choose_Image.setText("Choose Image");
+        Btn_Choose_Image.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                Btn_Choose_ImageActionPerformed(evt);
+            }
+        });
+
+        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
+        jPanel1.setLayout(jPanel1Layout);
+        jPanel1Layout.setHorizontalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                .addGap(16, 16, 16)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jLabel6, javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(jLabel7, javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(jLabel5, javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(jLabel4, javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(jLabel3, javax.swing.GroupLayout.Alignment.TRAILING))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(txt_id, javax.swing.GroupLayout.PREFERRED_SIZE, 63, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(txt_price, javax.swing.GroupLayout.PREFERRED_SIZE, 63, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(txt_name, javax.swing.GroupLayout.DEFAULT_SIZE, 120, Short.MAX_VALUE)
+                            .addComponent(txt_author)
+                            .addComponent(txt_ISBN)))
+                    .addComponent(btn_add, javax.swing.GroupLayout.PREFERRED_SIZE, 134, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 426, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addGap(25, 25, 25)
+                        .addComponent(btn_update)
+                        .addGap(47, 47, 47)
+                        .addComponent(btn_delete)))
+                .addGap(18, 18, 18)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(lbl_image, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(Btn_Choose_Image, javax.swing.GroupLayout.DEFAULT_SIZE, 143, Short.MAX_VALUE))
+                        .addGap(0, 12, Short.MAX_VALUE))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addGap(12, 12, 12)
+                        .addComponent(jLabel1)
+                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
+        );
+        jPanel1Layout.setVerticalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addGap(130, 130, 130)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                    .addComponent(jLabel3)
+                                    .addComponent(txt_id, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addGap(25, 25, 25)
+                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                    .addComponent(jLabel4)
+                                    .addComponent(txt_name, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addGap(18, 18, 18)
+                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                    .addComponent(jLabel5)
+                                    .addComponent(txt_author, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addGap(18, 18, 18)
+                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                                    .addComponent(jLabel6)
+                                    .addComponent(txt_ISBN, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addGap(18, 18, 18)
+                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                    .addComponent(jLabel7)
+                                    .addComponent(txt_price, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                            .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 251, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGap(31, 31, 31)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(btn_add, javax.swing.GroupLayout.PREFERRED_SIZE, 89, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(btn_update, javax.swing.GroupLayout.PREFERRED_SIZE, 88, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(btn_delete, javax.swing.GroupLayout.PREFERRED_SIZE, 88, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(jLabel1)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(lbl_image, javax.swing.GroupLayout.PREFERRED_SIZE, 285, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(Btn_Choose_Image, javax.swing.GroupLayout.PREFERRED_SIZE, 41, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addContainerGap(123, Short.MAX_VALUE))
+        );
+
+        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
+        getContentPane().setLayout(layout);
+        layout.setHorizontalGroup(
+            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+        );
+        layout.setVerticalGroup(
+            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+        );
+
+        pack();
+    }// </editor-fold>//GEN-END:initComponents
+
+    private void txt_idActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txt_idActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txt_idActionPerformed
+
+    private void txt_authorActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txt_authorActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txt_authorActionPerformed
+
+    private void txt_nameActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txt_nameActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txt_nameActionPerformed
+
+    private void txt_ISBNActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txt_ISBNActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txt_ISBNActionPerformed
+
+    private void txt_priceActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txt_priceActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txt_priceActionPerformed
+
+    private void btn_updateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_updateActionPerformed
+        if (checkInputs() && txt_id.getText() != null) {
+            String UpdateQuery = null;
+            PreparedStatement ps = null;
+            Connection con = getConnection();
+            // update without image
+            if (ImgPath == null) {
+                try {
+                    UpdateQuery = "UPDATE book SET name = ?, author = ?"
+                            + ", ISBN = ?, price = ? WHERE id = ?";
+                    ps = con.prepareStatement(UpdateQuery);
+
+                    ps.setString(1, txt_name.getText());
+                    ps.setString(2, txt_author.getText());
+                    ps.setString(3, txt_ISBN.getText());
+                    ps.setString(4, txt_price.getText());
+                    ps.setInt(5, Integer.parseInt(txt_id.getText()));
+                    ps.executeUpdate();
+                    JOptionPane.showMessageDialog(null, "Book Updated");
+                } catch (SQLException ex) {
+                    JOptionPane.showMessageDialog(null, ex.getMessage());
+                }
+                // update with image
+            } else {
+                try {                  
+                    InputStream img = new FileInputStream(new File(ImgPath));
+                    UpdateQuery = "UPDATE book SET name = ?, author = ?"
+                            + ", ISBN = ?, price = ?, image = ? WHERE id = ?";
+                    ps = con.prepareStatement(UpdateQuery);
+
+                    ps.setString(1, txt_name.getText());
+                    ps.setString(2, txt_author.getText());
+                    ps.setString(3, txt_ISBN.getText());
+                    ps.setString(4, txt_price.getText());
+                    ps.setBlob(5, img);
+                    ps.setInt(6, Integer.parseInt(txt_id.getText()));
+                    ps.executeUpdate();
+                    
+
+                    JOptionPane.showMessageDialog(null, "Book Updated");
+                        
+                } catch (HeadlessException | FileNotFoundException | NumberFormatException | SQLException ex) {
+                    JOptionPane.showMessageDialog(null, ex.getMessage());
+                }
+            }
+        } else {
+            JOptionPane.showMessageDialog(null, "Book Not Deleted : No Id To Delete");
+        }
+         Show_Books_In_JTable();
+
+    }//GEN-LAST:event_btn_updateActionPerformed
+
+    private void btn_addActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_addActionPerformed
+        if (checkInputs() && ImgPath != null) {
+            try {
+                Connection con = getConnection();
+                PreparedStatement ps = con.prepareStatement("INSERT INTO book(name,author,ISBN,price,image)"
+                        + "values(?,?,?,?,?)");
+                 ps.setString(1, txt_name.getText());
+                ps.setString(2, txt_author.getText());
+                ps.setString(3, txt_ISBN.getText());
+                ps.setString(4, txt_price.getText());
+                InputStream img = new FileInputStream(new File(ImgPath));
+                ps.setBlob(5, img);
+                ps.executeUpdate();
+
+                JOptionPane.showMessageDialog(null, "Data inserted");
+            } catch (HeadlessException | FileNotFoundException | SQLException ex) {
+                JOptionPane.showMessageDialog(null, ex.getMessage());
+
+            }
+        } else {
+            JOptionPane.showMessageDialog(null, "One or More Field Are Empty");
+        }
+
+        Show_Books_In_JTable();
+    
+    }
+    private void JTable_BooksMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_JTable_BooksMouseClicked
+        int index;
+        index = JTable_Books.getSelectedRow();
+        ShowItem(index);
+    
+   
+    }//GEN-LAST:event_btn_addActionPerformed
+
+    private void btn_deleteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_deleteActionPerformed
+        
+       if(!txt_id.getText().equals(""))
+        {
+            try {
+                Connection con = getConnection();
+                PreparedStatement ps = con.prepareStatement("DELETE FROM book WHERE id = ?");
+                int id = Integer.parseInt(txt_id.getText());
+                ps.setInt(1, id);
+                ps.executeUpdate();
+                JOptionPane.showMessageDialog(null, "Book Deleted");
+            } catch (SQLException ex) {
+                JOptionPane.showMessageDialog(null, "Book Not Deleted");
+            }
+         
+        }else{
+            JOptionPane.showMessageDialog(null, "Book Not Deleted : No Id To Delete");
+        }
+    Show_Books_In_JTable();
+            
+    }//GEN-LAST:event_btn_deleteActionPerformed
+
+    private void Btn_Choose_ImageActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_Btn_Choose_ImageActionPerformed
+         JFileChooser file = new JFileChooser();
+        file.setCurrentDirectory(new File(System.getProperty("user.home")));
+
+        FileNameExtensionFilter filter = new FileNameExtensionFilter("*.image", "jpg", "png");
+        file.addChoosableFileFilter(filter);
+        int result = file.showSaveDialog(null);
+        if (result == JFileChooser.APPROVE_OPTION) {
+            File selectedFile = file.getSelectedFile();
+            String path = selectedFile.getAbsolutePath();
+            lbl_image.setIcon(ResizeImage(path, null));
+            ImgPath = path;
+        } else {
+            System.out.println("No File Selected");
+
+        }
+
+    }//GEN-LAST:event_Btn_Choose_ImageActionPerformed
+
+    private void JTable_BooksAncestorAdded(javax.swing.event.AncestorEvent evt) {//GEN-FIRST:event_JTable_BooksAncestorAdded
+        // TODO add your handling code here:
+    }//GEN-LAST:event_JTable_BooksAncestorAdded
+
+    /**
+     * @param args the command line arguments
+     */
+    
+    public static void main(String args[]) {
+        /* Set the Nimbus look and feel */
+        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
+        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
+         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
+         */
+        try {
+            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
+                if ("Nimbus".equals(info.getName())) {
+                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
+                    break;
+                }
+            }
+        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | javax.swing.UnsupportedLookAndFeelException ex) {
+            java.util.logging.Logger.getLogger(GUI.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        }
+        //</editor-fold>
+        
+        //</editor-fold>
+
+        /* Create and display the form */
+          java.awt.EventQueue.invokeLater(() -> {
+              new GUI().setVisible(true);
+        });
+    }
+
+    // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton Btn_Choose_Image;
+    private javax.swing.JTable JTable_Books;
+    private javax.swing.JButton btn_add;
+    private javax.swing.JButton btn_delete;
+    private javax.swing.JButton btn_update;
+    private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel3;
+    private javax.swing.JLabel jLabel4;
+    private javax.swing.JLabel jLabel5;
+    private javax.swing.JLabel jLabel6;
+    private javax.swing.JLabel jLabel7;
+    private javax.swing.JPanel jPanel1;
+    private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JLabel lbl_image;
+    private javax.swing.JTextField txt_ISBN;
+    private javax.swing.JTextField txt_author;
+    private javax.swing.JTextField txt_id;
+    private javax.swing.JTextField txt_name;
+    private javax.swing.JTextField txt_price;
+    // End of variables declaration//GEN-END:variables
+}
